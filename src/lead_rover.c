@@ -218,7 +218,7 @@ void LEAD_ROVER_Tasks ( void )
             {
                 stopEverything();
             }
-            
+            debugBuffer("Received Command: ", 18);
             switch(command)
             {
                 case 'F':

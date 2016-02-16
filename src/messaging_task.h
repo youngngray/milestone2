@@ -72,6 +72,11 @@ typedef struct
     unsigned char footer;
     unsigned char valid;
     int numInvalid;
+    
+    unsigned int command_count;
+    unsigned int token_count;
+    unsigned int debug_count;
+    
 } MESSAGE_FORMAT;
 
 char isQueueEmpty();

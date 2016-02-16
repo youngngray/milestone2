@@ -96,6 +96,21 @@ MESSAGE_FORMAT msg_Format;
 // *****************************************************************************
 void sendMsgToWIFLY(unsigned char message[], unsigned int num)
 {
+    if(num == 10 && message[0] == 0x88)
+    {
+        if(message[2] == 0x01)
+        {
+            msg_Format.token_count++;
+            message[3] = msg_Format.token_count >> 8;
+            message[4] = (unsigned char) msg_Format.token_count;
+        }
+        if(message[2] == 0x09)
+        {
+            msg_Format.debug_count++;
+            message[3] = msg_Format.token_count >> 8;
+            message[4] = (unsigned char) msg_Format.token_count;
+        }
+    }
     debugChar(0xC0);
     int i;
     for(i = 0; i < num; i++)//i < sizeof(message)/sizeof(unsigned char); i++)
@@ -175,10 +190,16 @@ void MESSAGING_TASK_Initialize ( void )
     {
         stopEverything();
     }
+    //Tracking variables for parsing a message
     msg_Format.count = 0;
     msg_Format.validHeader = 0;
     msg_Format.validFooter = 0;
     msg_Format.numInvalid = 0;
+    
+    //Message count for error tracking
+    msg_Format.command_count = 0;
+    msg_Format.token_count = 0;
+    msg_Format.debug_count = 0;
     
     //stopEverything();
     /* Initialization is done, allow the state machine to continue */
@@ -357,6 +378,13 @@ void MESSAGING_TASK_Tasks ( void )
             
             if(msg_Format.type == 0x07)
             {
+                msg_Format.command_count++;
+                unsigned int num_received = (msg_Format.msgNum1 << 8) + msg_Format.msgNum2;
+                if(msg_Format.command_count != num_received)
+                {
+                    //Handle error message
+                    debugBuffer("CCount!=MsgCount", 16);
+                }
                 writeCommandQ(msg_Format.data1);
             }
             

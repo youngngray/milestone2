@@ -41,6 +41,26 @@ extern "C" {
     void debugBuffer(unsigned char buffer[], unsigned int num);
     void stopEverything( void );
     
+    /*DEFINES FOR DEBUGGING************************************************/
+    
+#define START_OF_ANDREW 0x01
+    /*Add your defines here*/
+#define END_OF_ANDREW 0x3f
+    
+#define START_OF_AUSTIN 0x40
+    /*Add your defines here*/
+#define END_OF_AUSTIN 0x7f
+    
+#define START_OF_MITCHELL 0x80
+    /*Add your defines here*/
+#define END_OF_MITCHELL 0xbf
+    
+#define START_OF_TOM 0xc0
+    /*Add your defines here*/
+#define END_OF_TOM 0xff
+    
+    /*END OF DEFINES*********************************************************/
+    
     
     /* Provide C++ Compatibility */
 #ifdef __cplusplus
