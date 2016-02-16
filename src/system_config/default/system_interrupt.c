@@ -75,10 +75,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 void IntHandlerDrvUsartInstance0(void)
 {
-    //debugCharFromISR(1);
+    debugCharFromISR(1);
     if(!isQueueEmpty())// && !PLIB_USART_TransmitterBufferIsFull(USART_ID_1))
     {
-        //debugCharFromISR(2);
+        debugCharFromISR(2);
         unsigned char data = 0x00;
         data = messageQ();
         //debugCharFromISR(data);
@@ -86,7 +86,7 @@ void IntHandlerDrvUsartInstance0(void)
     }
     else
     {
-        //debugCharFromISR(3);
+        debugCharFromISR(3);
         PLIB_INT_SourceDisable(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT);
     }
     
@@ -100,7 +100,7 @@ void IntHandlerDrvUsartInstance0(void)
     }
     
     /* Clear pending interrupt */
-    //debugCharFromISR(5);
+    debugCharFromISR(5);
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT);
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_RECEIVE);
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_ERROR);

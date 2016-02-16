@@ -3,21 +3,26 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Embedded/milestone_2/firmware/src/wifly.h</file>
             <file>file:/C:/Embedded/milestone_2/firmware/src/lead_rover.c</file>
             <file>file:/C:/Embedded/milestone_2/firmware/src/system_config/default/framework/system/clk/src/sys_clk_static.c</file>
+            <file>file:/C:/Embedded/milestone_2/firmware/src/messaging_task.c</file>
             <file>file:/C:/Embedded/milestone_2/firmware/src/lead_rover_public.h</file>
-            <file>file:/C:/Embedded/milestone_2/firmware/src/wifly.c</file>
+            <file>file:/C:/Embedded/milestone_2/firmware/src/messaging_task.h</file>
             <file>file:/C:/Embedded/milestone_2/firmware/src/debugging_task_public.h</file>
+            <file>file:/C:/microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/list.c</file>
             <file>file:/C:/Embedded/milestone_2/firmware/src/system_config/default/system_interrupt.c</file>
             <file>file:/C:/Embedded/milestone_2/firmware/src/main.c</file>
+            <file>file:/C:/Embedded/milestone_2/firmware/src/messaging_task_public.h</file>
             <file>file:/C:/Embedded/milestone_2/firmware/src/system_config/default/system_tasks.c</file>
             <file>file:/C:/Embedded/milestone_2/firmware/src/timer.c</file>
-            <file>file:/C:/Embedded/milestone_2/firmware/src/debug.h</file>
+            <file>file:/C:/Embedded/milestone_2/firmware/src/system_config/default/framework/driver/usart/drv_usart_static.h</file>
+            <file>file:/C:/Embedded/milestone_2/firmware/milestone_2.X/nbproject/Makefile-default.mk</file>
+            <file>file:/C:/microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX/port.c</file>
             <file>file:/C:/Embedded/milestone_2/firmware/src/debugging_task.h</file>
-            <file>file:/C:/Embedded/milestone_2/firmware/src/debug.c</file>
+            <file>file:/C:/microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/tasks.c</file>
             <file>file:/C:/Embedded/milestone_2/firmware/src/lead_rover.h</file>
             <file>file:/C:/Embedded/milestone_2/firmware/src/debugging_task.c</file>
+            <file>file:/C:/Embedded/milestone_2/firmware/src/system_config/default/framework/driver/usart/drv_usart_static.c</file>
         </group>
     </open-files>
 </project-private>

@@ -88,17 +88,10 @@ extern "C" {
         @code
         app1SendTimerValToMsgQ(100);
      */
-    int app1SendTimerValToMsgQ(unsigned int millisecondsElapsed);
-    /*
-    unsigned char readTransmitQ();
-    
-    unsigned char transmitQNotEmpty();
     
     void writeCommandQ(unsigned char towrite);
     
     void writeCommandQFromISR(unsigned char towrite);
-    
-    void writeMessageBufferFromISR(unsigned char write);*/
     
     /* Provide C++ Compatibility */
 #ifdef __cplusplus

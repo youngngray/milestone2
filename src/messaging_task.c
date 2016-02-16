@@ -79,7 +79,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 */
 
 MESSAGING_TASK_DATA msg_taskData;
-
+MESSAGE_FORMAT msg_Format;
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Callback Functions
@@ -96,6 +96,7 @@ MESSAGING_TASK_DATA msg_taskData;
 // *****************************************************************************
 void sendMsgToWIFLY(unsigned char message[], unsigned int num)
 {
+    debugChar(0xC0);
     int i;
     for(i = 0; i < num; i++)//i < sizeof(message)/sizeof(unsigned char); i++)
     {
@@ -105,7 +106,9 @@ void sendMsgToWIFLY(unsigned char message[], unsigned int num)
 
 void sendByteToWIFLY(unsigned char byte)
 {
+    debugChar(0xC1);
     xQueueSendToBack(msg_taskData.sendMsg_q, &byte, portMAX_DELAY);
+    debugChar(0xC2);
     PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT);
 }
 
@@ -172,6 +175,11 @@ void MESSAGING_TASK_Initialize ( void )
     {
         stopEverything();
     }
+    msg_Format.count = 0;
+    msg_Format.validHeader = 0;
+    msg_Format.validFooter = 0;
+    msg_Format.numInvalid = 0;
+    
     //stopEverything();
     /* Initialization is done, allow the state machine to continue */
     msg_taskData.state = MESSAGING_TASK_STATE_RUN;
@@ -214,8 +222,150 @@ void MESSAGING_TASK_Tasks ( void )
 #ifdef MACRO_DEBUG
       debugBuffer(0x08,5);      
 #endif
-      writeCommandQ(temp);
+      if((temp == 0x81) && (msg_Format.count == 0))
+            {
+//                sendByteToWIFLY(temp);
+                debugChar(0xD1);
+                //sendByteToWIFLY(msg_Format.header);
+                msg_Format.validHeader = 5;
+                msg_Format.header = temp;
+                msg_Format.count++;
+            }
+            else if ((temp != 0x81) && (msg_Format.count == 0))
+            {
+                //Invalid Message
+//                sendByteToWIFLY(temp);
+                debugChar(0xF3);
+                msg_Format.numInvalid++;
+                //sendMsgToWIFLY("NO\t");
+                sendByteToWIFLY(msg_Format.numInvalid);
+                //sendByteToWIFLY('\n');            
+                msg_Format.validHeader = 0;
+                msg_Format.validFooter = 0;
+                msg_Format.count = 0;
+            }
+            if((msg_Format.validHeader == 5) && (msg_Format.count != 0))
+            {
+                debugChar(0xEE);
+//                sendByteToWIFLY(temp);
+                if(msg_Format.count == 2){
+                    debugChar(0xD2);
+//                    sendByteToWIFLY(temp);
+                    msg_Format.dst = temp;
+                }
+                else if(msg_Format.count == 3) {
+                    debugChar(0xD3);
+//                    sendByteToWIFLY(temp);
+                    msg_Format.type = temp;
+                }
+                else if(msg_Format.count == 4) {
+                    debugChar(0xD4);
+//                    sendByteToWIFLY(temp);
+                    msg_Format.msgNum1 = temp;
+                }
+                else if(msg_Format.count == 5) {
+                    debugChar(0xD5);
+//                    sendByteToWIFLY(temp);
+                    msg_Format.msgNum2 = temp;
+                }
+                else if(msg_Format.count == 6) {
+                    debugChar(0xD6);
+//                    sendByteToWIFLY(temp);
+                    msg_Format.data1 = temp;
+                }
+                else if(msg_Format.count == 7) {
+                    debugChar(0xD7);
+//                    sendByteToWIFLY(temp);
+                    msg_Format.data2 = temp;
+                }
+                else if(msg_Format.count == 8) {
+                    debugChar(0xD8);
+//                    sendByteToWIFLY(temp);
+                    msg_Format.data3 = temp;
+                }
+                else if(msg_Format.count == 9) {
+                    debugChar(0xD9);
+//                    sendByteToWIFLY(temp);
+                    msg_Format.data4 = temp;
+                    
+                }
+                msg_Format.count++;
+            }
+            if((msg_Format.validHeader == 5)&&(temp == 0x88)&&(msg_Format.count == 11))
+            {
+                debugChar(0xE0);
+//                sendByteToWIFLY(temp);
+                msg_Format.footer = temp;
+                msg_Format.validFooter = 5;
+                msg_Format.count = 0;
+            }
+            else if((msg_Format.count == 11) && (msg_Format.validHeader == 5) && (temp != 0x88))
+            {
+                debugChar(0xF1);
+                //sendByteToWIFLY(0xF1);
+                msg_Format.numInvalid++;              
+                //sendMsgToWIFLY("NO\t");
+                sendByteToWIFLY(msg_Format.numInvalid);
+                //sendByteToWIFLY('\n');
+                msg_Format.validHeader = 0;
+                msg_Format.valid = 0;
+                msg_Format.validFooter = 0;
+                msg_Format.count = 0;
+            }
+            if((msg_Format.validHeader == 5) && (msg_Format.validFooter == 5))
+            {
+                //sendByteToWIFLY(0xE1);
+                msg_Format.valid = 1;
+                msg_Format.count = 0;
+            }
+      
+          if(msg_Format.valid == 1)
+          {
+                //sendByteToWIFLY(0xE1);
+              //debugChar(msg_Format.dst);
+              msg_Format.count = 0;
+              msg_taskData.state = MESSAGING_TASK_STATE_READ;
+          }
+            //debugChar(temp);
             //sendByteToWIFLY(temp);  
+            break;
+        }
+        case MESSAGING_TASK_STATE_READ:
+        {
+            
+            debugChar(msg_Format.header);
+            debugChar(msg_Format.dst);
+            debugChar(msg_Format.type);
+            debugChar(msg_Format.msgNum1);
+            debugChar(msg_Format.msgNum2);
+            debugChar(msg_Format.data1);
+            debugChar(msg_Format.data2);
+            debugChar(msg_Format.data3);
+            debugChar(msg_Format.data4);
+            debugChar(msg_Format.footer);
+            /*
+            sendByteToWIFLY(msg_Format.header);
+            sendByteToWIFLY(msg_Format.dst);
+            sendByteToWIFLY(msg_Format.type);
+            sendByteToWIFLY(msg_Format.msgNum1);
+            sendByteToWIFLY(msg_Format.msgNum2);
+            sendByteToWIFLY(msg_Format.data1);
+            sendByteToWIFLY(msg_Format.data2);
+            sendByteToWIFLY(msg_Format.data3);
+            sendByteToWIFLY(msg_Format.data4);
+            sendByteToWIFLY(msg_Format.footer);*/
+            
+            if(msg_Format.type == 0x07)
+            {
+                writeCommandQ(msg_Format.data1);
+            }
+            
+            msg_Format.count = 0;
+            msg_Format.validHeader = 0;
+            msg_Format.validFooter = 0;
+            msg_Format.valid = 0;
+            msg_taskData.state = MESSAGING_TASK_STATE_RUN;
+            break;
         }
         /* The default state should never be executed. */
         default:

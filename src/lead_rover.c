@@ -96,24 +96,6 @@ LEAD_ROVER_DATA lead_roverData;
 
 /* TODO:  Add any necessary local functions.
 */
-/*
-unsigned char readTransmitQ()
-{
-    unsigned char data = 0x00;
-    BaseType_t errors;
-    errors = xQueueReceiveFromISR(lead_roverData.transmit_q , &data, NULL);
-    return data;
-}
-
-unsigned char transmitQNotEmpty()
-{
-     if( pdFALSE == xQueueIsQueueEmptyFromISR( lead_roverData.transmit_q ))
-     {
-         return 1;
-     }
-     return 0;
-}
-*/
 void writeCommandQFromISR(unsigned char towrite)
 {
     xQueueSendToBackFromISR(lead_roverData.receive_q, &towrite, NULL);
@@ -122,17 +104,6 @@ void writeCommandQFromISR(unsigned char towrite)
 void writeCommandQ(unsigned char towrite)
 {
     xQueueSendToBack(lead_roverData.receive_q, &towrite, portMAX_DELAY);
-}
-
-void writeMessageBufferFromISR(unsigned char write)
-{
-    lead_roverData.message_buffer[lead_roverData.message_location] = write;
-    if(lead_roverData.message_location == 5)
-    {
-        writeCommandQFromISR(write);
-        lead_roverData.message_ready = 1;
-    }
-    lead_roverData.message_location += 1;
 }
 
 // *****************************************************************************
@@ -207,15 +178,12 @@ void LEAD_ROVER_Initialize ( void )
         stopEverything();
     }
     
-    lead_roverData.message_ready = 0;
-    lead_roverData.message_location = 0;
-    lead_roverData.first_time = 1;
-    
     lead_roverMessage.command = 0x00;
     
     stop();
     /* Initialization is done, allow the state machine to continue */
-    lead_roverData.state = LEAD_ROVER_STATE_OUTPUT;
+    //lead_roverData.state = LEAD_ROVER_STATE_SEND_REPLY;
+    lead_roverData.state = LEAD_ROVER_STATE_RUN;
 
 }
 
@@ -229,17 +197,6 @@ void LEAD_ROVER_Initialize ( void )
 void LEAD_ROVER_Tasks ( void )
 {
     
-    //Needed to establish connection to raspberry pi
-    //Need to find a better way
-#ifdef PI_COMMS
-    if(lead_roverData.first_time)
-    {
-        vTaskDelay(200);
-        sendByte('\n', lead_roverData.transmit_q);
-        first = 0;
-    }
-#endif
-    
     /* Check the application's current state. */
     switch ( lead_roverData.state )
     {
@@ -250,12 +207,12 @@ void LEAD_ROVER_Tasks ( void )
         }
 
         /* TODO: implement your application state machine.*/
-        case LEAD_ROVER_STATE_OUTPUT:
+        case LEAD_ROVER_STATE_RUN:
         {
             unsigned char command;
             BaseType_t received = xQueueReceive(lead_roverData.receive_q,
                     &command, portMAX_DELAY);
-            sendByteToWIFLY(command);  
+            //sendByteToWIFLY(command);  
             //If not received, stop and turn on LED.
             if(received == pdFALSE)
             {
@@ -264,34 +221,39 @@ void LEAD_ROVER_Tasks ( void )
             
             switch(command)
             {
-                case 'f':
+                case 'F':
                 {
                     forward();
-                    sendMsgToWIFLY("Moving forward\n", 15);
+                    debugChar('F');
+                    lead_roverData.state = LEAD_ROVER_STATE_SEND_REPLY;
                     break;
                 }
-                case 's':
+                case 'S':
                 {
                     stop();
-                    sendMsgToWIFLY("Stopped\n", 8);
+                    debugChar('S');
+                    lead_roverData.state = LEAD_ROVER_STATE_SEND_REPLY;
                     break;
                 }
-                case 'l':
+                case 'L':
                 {
                     left();
-                    sendMsgToWIFLY("Turning Left\n", 13);
+                    debugChar('L');
+                    lead_roverData.state = LEAD_ROVER_STATE_SEND_REPLY;
                     break;
                 }
-                case 'b':
+                case 'B':
                 {
                     reverse();
-                    sendMsgToWIFLY("Moving Backwards\n", 15);
+                    debugChar('B');
+                    lead_roverData.state = LEAD_ROVER_STATE_SEND_REPLY;
                     break;
                 }
-                case 'r':
+                case 'R':
                 {
                     right();
-                    sendMsgToWIFLY("Turning Right\n", 14);
+                    debugChar('R');
+                    lead_roverData.state = LEAD_ROVER_STATE_SEND_REPLY;
                     break;
                 }
                 default:
@@ -302,15 +264,13 @@ void LEAD_ROVER_Tasks ( void )
             //lead_roverData.state = LEAD_ROVER_STATE_CHECK_MESSAGE;
             break;
         }
-        case LEAD_ROVER_STATE_CHECK_MESSAGE:
+        case LEAD_ROVER_STATE_SEND_REPLY:
         {
-            if(lead_roverData.message_ready == 1)
-            {
-                debugBuffer(lead_roverData.message_buffer, 6);
-                lead_roverData.message_ready = 0;
-                lead_roverData.message_location = 0;
-            }
-            lead_roverData.state = LEAD_ROVER_STATE_OUTPUT;
+            vTaskDelay(400);
+            unsigned char message[10] = {0x81, 'F', 0x01, 0, 0, 0, 0, 0, 0, 0x88};
+            sendMsgToWIFLY(message, 10);
+            debugChar(0xCC);
+            lead_roverData.state = LEAD_ROVER_STATE_RUN;
         }
         /* The default state should never be executed. */
         default:

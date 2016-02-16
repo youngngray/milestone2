@@ -65,8 +65,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "debugging_task_public.h"
 
 
-//#define PI_COMMS
-
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -98,8 +96,8 @@ typedef enum
 	LEAD_ROVER_STATE_INIT=0,
 
 	/* TODO: Define states used by the application state machine. */
-    LEAD_ROVER_STATE_OUTPUT = 1,
-    LEAD_ROVER_STATE_CHECK_MESSAGE = 2,
+    LEAD_ROVER_STATE_RUN = 1,
+    LEAD_ROVER_STATE_SEND_REPLY = 2,
 
 } LEAD_ROVER_STATES;
 
@@ -127,16 +125,6 @@ typedef struct
     
     //Queue for receiving commands
     QueueHandle_t receive_q;
-    
-    //Receive message buffer
-    unsigned char message_buffer[256];
-    //Message ready to be received
-    unsigned char message_ready;
-    //Message location
-    unsigned int message_location;
-    
-    //First run for PI comms
-    unsigned char first_time;
 
 } LEAD_ROVER_DATA;
 
